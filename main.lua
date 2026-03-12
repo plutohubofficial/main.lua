@@ -1,79 +1,94 @@
--- [[ BLOXBURG ULTIMATE DETECTION ENGINE ]]
--- PURPOSE: 100% CERTAINTY OF ACCOUNT TERMINATION / SERVER KICK
--- COMBINES: REMOTE SPAM + TELEPORT LOOP + MEMORY BLOAT + PACKET OVERLOAD
+-- [[ BLOXBURG TOTAL TERMINATION SUITE ]]
+-- VERSION: FINAL COMBINED (MAXIMUM DETECTION)
+-- PURPOSE: 100% ACCOUNT BAN & SERVER SATURATION
 
-print("Delta: Initiating Full-Spectrum Detection...")
+print("Delta: Initiating Full-Spectrum System Meltdown...")
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TeleportService = game:GetService("TeleportService")
 local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
 local NetworkSettings = settings().Network
+local LP = Players.LocalPlayer
 
--- 1. FLAG #1: IMPOSSIBLE NETWORK LATENCY
--- Forces the engine to a state that is physically impossible for a human connection.
+-- 1. ENGINE-LEVEL LAG (SYNC-LOCK)
+-- Forces the client into a state that is impossible for normal gameplay.
 NetworkSettings.IncomingReplicationLag = 999999
 
--- 2. FLAG #2: THE REMOTE EVENT "HURRICANE"
--- This finds every single RemoteEvent in the game and spams them with corrupt data.
+-- 2. ECONOMY & DATA CORRUPTION (THE "BAN" TRIGGER)
+-- Firing remotes with 'NaN' (0/0) or Infinity to break server math.
 task.spawn(function()
-    local Remotes = {}
+    local Events = ReplicatedStorage:WaitForChild("Events", 5)
+    while true do
+        if Events then
+            pcall(function()
+                -- Sending illegal values to the bank and job systems
+                Events:FireServer("DonateMoney", {["Recipient"] = LP, ["Amount"] = 0/0})
+                Events:FireServer("JobAction", {["Type"] = "Complete", ["Amount"] = math.huge})
+                Events:FireServer("PurchaseItem", {["Item"] = "HouseSlot", ["Price"] = -math.huge})
+            end)
+        end
+        task.wait(0.01)
+    end
+end)
+
+-- 3. THE "HONEYPOT" TSUNAMI
+-- Scans and spams every remote, specifically hunting for hidden "Trap" remotes.
+task.spawn(function()
+    local AllRemotes = {}
     for _, v in pairs(ReplicatedStorage:GetDescendants()) do
-        if v:IsA("RemoteEvent") then table.insert(Remotes, v) end
+        if v:IsA("RemoteEvent") then table.insert(AllRemotes, v) end
     end
 
     while true do
-        for _, remote in pairs(Remotes) do
-            for i = 1, 100 do -- 100 packets per remote per frame
-                pcall(function()
-                    -- Sending 'math.huge' (Infinity) triggers an Overflow Error in the server logs.
-                    remote:FireServer("DETECTION_TEST_DATA", {["Overload"] = math.huge, ["Spam"] = string.rep("BAN_ME_", 500)})
-                end)
-            end
+        for _, remote in pairs(AllRemotes) do
+            pcall(function()
+                -- Circular Reference Table: Designed to crash the server's data parser
+                local CrashTable = {}
+                CrashTable[1] = CrashTable 
+                
+                -- Sending massive amounts of corrupt data
+                remote:FireServer(CrashTable, {["Exploit"] = true, ["Payload"] = string.rep("BAN", 500)})
+            end)
         end
         RunService.Heartbeat:Wait()
     end
 end)
 
--- 3. FLAG #3: RECURSIVE NEIGHBORHOOD JOINING
--- This spams the 'Join' signal to hundreds of random IDs per second.
+-- 4. PHYSICS BOUNDARY BREACH (GLITCH-STATE)
+-- Moving to non-existent coordinates (NaN) to trigger position flags.
 task.spawn(function()
-    local JoinRemote = ReplicatedStorage:FindFirstChild("JoinNeighborhood", true)
-    while true do
-        if JoinRemote then
-            for i = 1, 50 do
-                JoinRemote:FireServer(tostring(math.random(100000, 999999)))
-            end
-        end
-        task.wait(0.1)
-    end
+    local Char = LP.Character or LP.CharacterAdded:Wait()
+    local Root = Char:WaitForChild("HumanoidRootPart")
+    
+    RunService.RenderStepped:Connect(function()
+        -- Setting position to 'Not a Number' (Impossible location)
+        Root.CFrame = CFrame.new(0/0, 0/0, 0/0)
+    end)
 end)
 
--- 4. FLAG #4: CLIENT-SIDE FREEZE (STALL)
--- This creates so much local lag that the 'Heartbeat' signal to the server stops,
--- which the server sees as a 'Timed Out' or 'Script Injection' freeze.
+-- 5. METATABLE TAMPERING (HYPERION TRIGGER)
+-- Direct manipulation of the game's core logic table.
 task.spawn(function()
-    local Bloat = {}
-    while true do
-        -- Fills RAM until the OS starts to struggle
-        for i = 1, 100000 do
-            table.insert(Bloat, "MEMORY_OVERFLOW_STRING_")
-        end
-        -- Heavy CPU loop
-        local s = tick()
-        while tick() - s < 0.5 do end 
-        task.wait()
-    end
+    local mt = getrawmetatable(game)
+    if setreadonly then setreadonly(mt, false) end
+    local old = mt.__index
+    
+    mt.__index = newcclosure(function(t, k)
+        return old(t, k)
+    end)
 end)
 
--- 5. FLAG #5: FORCED TELEPORT REQUESTS
--- Tells the server you are trying to leave and join at the same time.
-task.spawn(function()
-    while true do
-        pcall(function()
-            TeleportService:Teleport(185655149) -- Bloxburg PlaceID
-        end)
-        task.wait(0.2)
-    end
-end)
+-- 6. STATUS OVERLAY (Last message before the ban)
+local sg = Instance.new("ScreenGui", LP:WaitForChild("PlayerGui"))
+local f = Instance.new("Frame", sg)
+f.Size = UDim2.new(1, 0, 0, 60)
+f.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+local t = Instance.new("TextLabel", f)
+t.Size = UDim2.new(1, 0, 1, 0)
+t.Text = "NUCLEAR PROTOCOL ACTIVE - GOODBYE ACCOUNT"
+t.TextColor3 = Color3.new(1, 1, 1)
+t.Font = Enum.Font.GothamBold
+t.TextSize = 25
 
-print("Delta: All flags active. Goodbye account.")
+print("Delta: All flags deployed. Your connection will be terminated shortly.")
